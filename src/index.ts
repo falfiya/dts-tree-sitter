@@ -266,10 +266,29 @@ function generateInterfaceFromEntry(entry: NodeTypeEntry, index: IndexedData, pr
             }
             let opt = (children.required || children.multiple) ? '' : '?';
             printer.println(`${fieldName}${opt}: ${type};`);
-        })
+        });
+
+    if (entry.children) {
+        if (!entry.children.multiple && entry.children.required) {
+            printer.println(`children: [${kind}Child];`);
+        } else {
+            printer.println(`children: ${kind}Child[];`);
+        }
+        printer.println(`namedChildren: (${kind}Child & NamedNodeBase)[];`)
+        printer.println();
+        printer.println(`child(index: number): ${kind}Child | null;`);
+        printer.println(`namedChild(index: number): (${kind}Child & NamedNodeBase) | null;`);
+    }
+
+    printer
         .deindent()
         .println('}')
         .println();
+
+    if (entry.children) {
+        generateUnion(`${kind}Child`, entry.children.types, index, printer);
+        printer.println();
+    }
 }
 
 function generateUnionFromEntry(entry: NodeTypeEntry, index: IndexedData, printer: Printer) {
