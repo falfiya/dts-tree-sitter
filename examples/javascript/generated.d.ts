@@ -136,7 +136,7 @@ export interface TreeCursor {
 }
 
 export interface Tree {
-  readonly rootNode: SyntaxNode;
+  readonly rootNode: ProgramNode;
 
   rootNodeWithOffset(offsetBytes: number, offsetExtent: Point): SyntaxNode;
   edit(edit: Edit): Tree;
@@ -803,15 +803,48 @@ export type StatementNode =
 
 export interface ArgumentsNode extends NamedNodeBase {
   type: SyntaxType.Arguments;
+  children: ArgumentsChild[];
+  namedChildren: (ArgumentsChild & NamedNodeBase)[];
+
+  child(index: number): ArgumentsChild | null;
+  namedChild(index: number): (ArgumentsChild & NamedNodeBase) | null;
 }
+
+export type ArgumentsChild =
+  | ExpressionNode
+  | SpreadElementNode
+  ;
+
 
 export interface ArrayNode extends NamedNodeBase {
   type: SyntaxType.Array;
+  children: ArrayChild[];
+  namedChildren: (ArrayChild & NamedNodeBase)[];
+
+  child(index: number): ArrayChild | null;
+  namedChild(index: number): (ArrayChild & NamedNodeBase) | null;
 }
+
+export type ArrayChild =
+  | ExpressionNode
+  | SpreadElementNode
+  ;
+
 
 export interface ArrayPatternNode extends NamedNodeBase {
   type: SyntaxType.ArrayPattern;
+  children: ArrayPatternChild[];
+  namedChildren: (ArrayPatternChild & NamedNodeBase)[];
+
+  child(index: number): ArrayPatternChild | null;
+  namedChild(index: number): (ArrayPatternChild & NamedNodeBase) | null;
 }
+
+export type ArrayPatternChild =
+  | AssignmentPatternNode
+  | PatternNode
+  ;
+
 
 export interface ArrowFunctionNode extends NamedNodeBase {
   type: SyntaxType.ArrowFunction;
@@ -841,7 +874,14 @@ export interface AugmentedAssignmentExpressionNode extends NamedNodeBase {
 
 export interface AwaitExpressionNode extends NamedNodeBase {
   type: SyntaxType.AwaitExpression;
+  children: [AwaitExpressionChild];
+  namedChildren: (AwaitExpressionChild & NamedNodeBase)[];
+
+  child(index: number): AwaitExpressionChild | null;
+  namedChild(index: number): (AwaitExpressionChild & NamedNodeBase) | null;
 }
+
+export type AwaitExpressionChild = ExpressionNode;
 
 export interface BinaryExpressionNode extends NamedNodeBase {
   type: SyntaxType.BinaryExpression;
@@ -873,7 +913,14 @@ export interface ClassNode extends NamedNodeBase {
   bodyNode: ClassBodyNode;
   decoratorNodes: DecoratorNode[];
   nameNode?: IdentifierNode;
+  children: ClassChild[];
+  namedChildren: (ClassChild & NamedNodeBase)[];
+
+  child(index: number): ClassChild | null;
+  namedChild(index: number): (ClassChild & NamedNodeBase) | null;
 }
+
+export type ClassChild = ClassHeritageNode;
 
 export interface ClassBodyNode extends NamedNodeBase {
   type: SyntaxType.ClassBody;
@@ -885,11 +932,25 @@ export interface ClassDeclarationNode extends NamedNodeBase {
   bodyNode: ClassBodyNode;
   decoratorNodes: DecoratorNode[];
   nameNode: IdentifierNode;
+  children: ClassDeclarationChild[];
+  namedChildren: (ClassDeclarationChild & NamedNodeBase)[];
+
+  child(index: number): ClassDeclarationChild | null;
+  namedChild(index: number): (ClassDeclarationChild & NamedNodeBase) | null;
 }
+
+export type ClassDeclarationChild = ClassHeritageNode;
 
 export interface ClassHeritageNode extends NamedNodeBase {
   type: SyntaxType.ClassHeritage;
+  children: [ClassHeritageChild];
+  namedChildren: (ClassHeritageChild & NamedNodeBase)[];
+
+  child(index: number): ClassHeritageChild | null;
+  namedChild(index: number): (ClassHeritageChild & NamedNodeBase) | null;
 }
+
+export type ClassHeritageChild = ExpressionNode;
 
 export interface ClassStaticBlockNode extends NamedNodeBase {
   type: SyntaxType.ClassStaticBlock;
@@ -898,7 +959,14 @@ export interface ClassStaticBlockNode extends NamedNodeBase {
 
 export interface ComputedPropertyNameNode extends NamedNodeBase {
   type: SyntaxType.ComputedPropertyName;
+  children: [ComputedPropertyNameChild];
+  namedChildren: (ComputedPropertyNameChild & NamedNodeBase)[];
+
+  child(index: number): ComputedPropertyNameChild | null;
+  namedChild(index: number): (ComputedPropertyNameChild & NamedNodeBase) | null;
 }
+
+export type ComputedPropertyNameChild = ExpressionNode;
 
 export interface ContinueStatementNode extends NamedNodeBase {
   type: SyntaxType.ContinueStatement;
@@ -911,7 +979,19 @@ export interface DebuggerStatementNode extends NamedNodeBase {
 
 export interface DecoratorNode extends NamedNodeBase {
   type: SyntaxType.Decorator;
+  children: [DecoratorChild];
+  namedChildren: (DecoratorChild & NamedNodeBase)[];
+
+  child(index: number): DecoratorChild | null;
+  namedChild(index: number): (DecoratorChild & NamedNodeBase) | null;
 }
+
+export type DecoratorChild =
+  | CallExpressionNode
+  | IdentifierNode
+  | MemberExpressionNode
+  ;
+
 
 export interface DoStatementNode extends NamedNodeBase {
   type: SyntaxType.DoStatement;
@@ -921,7 +1001,14 @@ export interface DoStatementNode extends NamedNodeBase {
 
 export interface ElseClauseNode extends NamedNodeBase {
   type: SyntaxType.ElseClause;
+  children: [ElseClauseChild];
+  namedChildren: (ElseClauseChild & NamedNodeBase)[];
+
+  child(index: number): ElseClauseChild | null;
+  namedChild(index: number): (ElseClauseChild & NamedNodeBase) | null;
 }
+
+export type ElseClauseChild = StatementNode;
 
 export interface EmptyStatementNode extends NamedNodeBase {
   type: SyntaxType.EmptyStatement;
@@ -929,7 +1016,14 @@ export interface EmptyStatementNode extends NamedNodeBase {
 
 export interface ExportClauseNode extends NamedNodeBase {
   type: SyntaxType.ExportClause;
+  children: ExportClauseChild[];
+  namedChildren: (ExportClauseChild & NamedNodeBase)[];
+
+  child(index: number): ExportClauseChild | null;
+  namedChild(index: number): (ExportClauseChild & NamedNodeBase) | null;
 }
+
+export type ExportClauseChild = ExportSpecifierNode;
 
 export interface ExportSpecifierNode extends NamedNodeBase {
   type: SyntaxType.ExportSpecifier;
@@ -943,11 +1037,33 @@ export interface ExportStatementNode extends NamedNodeBase {
   decoratorNodes: DecoratorNode[];
   sourceNode?: StringNode;
   valueNode?: ExpressionNode;
+  children: ExportStatementChild[];
+  namedChildren: (ExportStatementChild & NamedNodeBase)[];
+
+  child(index: number): ExportStatementChild | null;
+  namedChild(index: number): (ExportStatementChild & NamedNodeBase) | null;
 }
+
+export type ExportStatementChild =
+  | ExportClauseNode
+  | NamespaceExportNode
+  ;
+
 
 export interface ExpressionStatementNode extends NamedNodeBase {
   type: SyntaxType.ExpressionStatement;
+  children: [ExpressionStatementChild];
+  namedChildren: (ExpressionStatementChild & NamedNodeBase)[];
+
+  child(index: number): ExpressionStatementChild | null;
+  namedChild(index: number): (ExpressionStatementChild & NamedNodeBase) | null;
 }
+
+export type ExpressionStatementChild =
+  | ExpressionNode
+  | SequenceExpressionNode
+  ;
+
 
 export interface FieldDefinitionNode extends NamedNodeBase {
   type: SyntaxType.FieldDefinition;
@@ -981,7 +1097,18 @@ export interface ForStatementNode extends NamedNodeBase {
 
 export interface FormalParametersNode extends NamedNodeBase {
   type: SyntaxType.FormalParameters;
+  children: FormalParametersChild[];
+  namedChildren: (FormalParametersChild & NamedNodeBase)[];
+
+  child(index: number): FormalParametersChild | null;
+  namedChild(index: number): (FormalParametersChild & NamedNodeBase) | null;
 }
+
+export type FormalParametersChild =
+  | AssignmentPatternNode
+  | PatternNode
+  ;
+
 
 export interface FunctionDeclarationNode extends NamedNodeBase {
   type: SyntaxType.FunctionDeclaration;
@@ -1024,11 +1151,30 @@ export interface ImportNode extends NamedNodeBase {
 
 export interface ImportAttributeNode extends NamedNodeBase {
   type: SyntaxType.ImportAttribute;
+  children: [ImportAttributeChild];
+  namedChildren: (ImportAttributeChild & NamedNodeBase)[];
+
+  child(index: number): ImportAttributeChild | null;
+  namedChild(index: number): (ImportAttributeChild & NamedNodeBase) | null;
 }
+
+export type ImportAttributeChild = ObjectNode;
 
 export interface ImportClauseNode extends NamedNodeBase {
   type: SyntaxType.ImportClause;
+  children: ImportClauseChild[];
+  namedChildren: (ImportClauseChild & NamedNodeBase)[];
+
+  child(index: number): ImportClauseChild | null;
+  namedChild(index: number): (ImportClauseChild & NamedNodeBase) | null;
 }
+
+export type ImportClauseChild =
+  | IdentifierNode
+  | NamedImportsNode
+  | NamespaceImportNode
+  ;
+
 
 export interface ImportSpecifierNode extends NamedNodeBase {
   type: SyntaxType.ImportSpecifier;
@@ -1039,11 +1185,37 @@ export interface ImportSpecifierNode extends NamedNodeBase {
 export interface ImportStatementNode extends NamedNodeBase {
   type: SyntaxType.ImportStatement;
   sourceNode: StringNode;
+  children: ImportStatementChild[];
+  namedChildren: (ImportStatementChild & NamedNodeBase)[];
+
+  child(index: number): ImportStatementChild | null;
+  namedChild(index: number): (ImportStatementChild & NamedNodeBase) | null;
 }
+
+export type ImportStatementChild =
+  | ImportAttributeNode
+  | ImportClauseNode
+  ;
+
 
 export interface JsxAttributeNode extends NamedNodeBase {
   type: SyntaxType.JsxAttribute;
+  children: JsxAttributeChild[];
+  namedChildren: (JsxAttributeChild & NamedNodeBase)[];
+
+  child(index: number): JsxAttributeChild | null;
+  namedChild(index: number): (JsxAttributeChild & NamedNodeBase) | null;
 }
+
+export type JsxAttributeChild =
+  | JsxElementNode
+  | JsxExpressionNode
+  | JsxNamespaceNameNode
+  | JsxSelfClosingElementNode
+  | PropertyIdentifierNode
+  | StringNode
+  ;
+
 
 export interface JsxClosingElementNode extends NamedNodeBase {
   type: SyntaxType.JsxClosingElement;
@@ -1054,15 +1226,48 @@ export interface JsxElementNode extends NamedNodeBase {
   type: SyntaxType.JsxElement;
   close_tagNode: JsxClosingElementNode;
   open_tagNode: JsxOpeningElementNode;
+  children: JsxElementChild[];
+  namedChildren: (JsxElementChild & NamedNodeBase)[];
+
+  child(index: number): JsxElementChild | null;
+  namedChild(index: number): (JsxElementChild & NamedNodeBase) | null;
 }
+
+export type JsxElementChild =
+  | HtmlCharacterReferenceNode
+  | JsxElementNode
+  | JsxExpressionNode
+  | JsxSelfClosingElementNode
+  | JsxTextNode
+  ;
+
 
 export interface JsxExpressionNode extends NamedNodeBase {
   type: SyntaxType.JsxExpression;
+  children: JsxExpressionChild[];
+  namedChildren: (JsxExpressionChild & NamedNodeBase)[];
+
+  child(index: number): JsxExpressionChild | null;
+  namedChild(index: number): (JsxExpressionChild & NamedNodeBase) | null;
 }
+
+export type JsxExpressionChild =
+  | ExpressionNode
+  | SequenceExpressionNode
+  | SpreadElementNode
+  ;
+
 
 export interface JsxNamespaceNameNode extends NamedNodeBase {
   type: SyntaxType.JsxNamespaceName;
+  children: JsxNamespaceNameChild[];
+  namedChildren: (JsxNamespaceNameChild & NamedNodeBase)[];
+
+  child(index: number): JsxNamespaceNameChild | null;
+  namedChild(index: number): (JsxNamespaceNameChild & NamedNodeBase) | null;
 }
+
+export type JsxNamespaceNameChild = IdentifierNode;
 
 export interface JsxOpeningElementNode extends NamedNodeBase {
   type: SyntaxType.JsxOpeningElement;
@@ -1085,7 +1290,14 @@ export interface LabeledStatementNode extends NamedNodeBase {
 export interface LexicalDeclarationNode extends NamedNodeBase {
   type: SyntaxType.LexicalDeclaration;
   kindNode: UnnamedNode<"const"> | UnnamedNode<"let">;
+  children: LexicalDeclarationChild[];
+  namedChildren: (LexicalDeclarationChild & NamedNodeBase)[];
+
+  child(index: number): LexicalDeclarationChild | null;
+  namedChild(index: number): (LexicalDeclarationChild & NamedNodeBase) | null;
 }
+
+export type LexicalDeclarationChild = VariableDeclaratorNode;
 
 export interface MemberExpressionNode extends NamedNodeBase {
   type: SyntaxType.MemberExpression;
@@ -1108,15 +1320,40 @@ export interface MethodDefinitionNode extends NamedNodeBase {
 
 export interface NamedImportsNode extends NamedNodeBase {
   type: SyntaxType.NamedImports;
+  children: NamedImportsChild[];
+  namedChildren: (NamedImportsChild & NamedNodeBase)[];
+
+  child(index: number): NamedImportsChild | null;
+  namedChild(index: number): (NamedImportsChild & NamedNodeBase) | null;
 }
+
+export type NamedImportsChild = ImportSpecifierNode;
 
 export interface NamespaceExportNode extends NamedNodeBase {
   type: SyntaxType.NamespaceExport;
+  children: [NamespaceExportChild];
+  namedChildren: (NamespaceExportChild & NamedNodeBase)[];
+
+  child(index: number): NamespaceExportChild | null;
+  namedChild(index: number): (NamespaceExportChild & NamedNodeBase) | null;
 }
+
+export type NamespaceExportChild =
+  | IdentifierNode
+  | StringNode
+  ;
+
 
 export interface NamespaceImportNode extends NamedNodeBase {
   type: SyntaxType.NamespaceImport;
+  children: [NamespaceImportChild];
+  namedChildren: (NamespaceImportChild & NamedNodeBase)[];
+
+  child(index: number): NamespaceImportChild | null;
+  namedChild(index: number): (NamespaceImportChild & NamedNodeBase) | null;
 }
+
+export type NamespaceImportChild = IdentifierNode;
 
 export interface NewExpressionNode extends NamedNodeBase {
   type: SyntaxType.NewExpression;
@@ -1126,7 +1363,20 @@ export interface NewExpressionNode extends NamedNodeBase {
 
 export interface ObjectNode extends NamedNodeBase {
   type: SyntaxType.Object;
+  children: ObjectChild[];
+  namedChildren: (ObjectChild & NamedNodeBase)[];
+
+  child(index: number): ObjectChild | null;
+  namedChild(index: number): (ObjectChild & NamedNodeBase) | null;
 }
+
+export type ObjectChild =
+  | MethodDefinitionNode
+  | PairNode
+  | ShorthandPropertyIdentifierNode
+  | SpreadElementNode
+  ;
+
 
 export interface ObjectAssignmentPatternNode extends NamedNodeBase {
   type: SyntaxType.ObjectAssignmentPattern;
@@ -1136,7 +1386,20 @@ export interface ObjectAssignmentPatternNode extends NamedNodeBase {
 
 export interface ObjectPatternNode extends NamedNodeBase {
   type: SyntaxType.ObjectPattern;
+  children: ObjectPatternChild[];
+  namedChildren: (ObjectPatternChild & NamedNodeBase)[];
+
+  child(index: number): ObjectPatternChild | null;
+  namedChild(index: number): (ObjectPatternChild & NamedNodeBase) | null;
 }
+
+export type ObjectPatternChild =
+  | ObjectAssignmentPatternNode
+  | PairPatternNode
+  | RestPatternNode
+  | ShorthandPropertyIdentifierPatternNode
+  ;
+
 
 export interface PairNode extends NamedNodeBase {
   type: SyntaxType.Pair;
@@ -1152,11 +1415,33 @@ export interface PairPatternNode extends NamedNodeBase {
 
 export interface ParenthesizedExpressionNode extends NamedNodeBase {
   type: SyntaxType.ParenthesizedExpression;
+  children: [ParenthesizedExpressionChild];
+  namedChildren: (ParenthesizedExpressionChild & NamedNodeBase)[];
+
+  child(index: number): ParenthesizedExpressionChild | null;
+  namedChild(index: number): (ParenthesizedExpressionChild & NamedNodeBase) | null;
 }
+
+export type ParenthesizedExpressionChild =
+  | ExpressionNode
+  | SequenceExpressionNode
+  ;
+
 
 export interface ProgramNode extends NamedNodeBase {
   type: SyntaxType.Program;
+  children: ProgramChild[];
+  namedChildren: (ProgramChild & NamedNodeBase)[];
+
+  child(index: number): ProgramChild | null;
+  namedChild(index: number): (ProgramChild & NamedNodeBase) | null;
 }
+
+export type ProgramChild =
+  | HashBangLineNode
+  | StatementNode
+  ;
+
 
 export interface RegexNode extends NamedNodeBase {
   type: SyntaxType.Regex;
@@ -1166,27 +1451,86 @@ export interface RegexNode extends NamedNodeBase {
 
 export interface RestPatternNode extends NamedNodeBase {
   type: SyntaxType.RestPattern;
+  children: [RestPatternChild];
+  namedChildren: (RestPatternChild & NamedNodeBase)[];
+
+  child(index: number): RestPatternChild | null;
+  namedChild(index: number): (RestPatternChild & NamedNodeBase) | null;
 }
+
+export type RestPatternChild =
+  | ArrayPatternNode
+  | IdentifierNode
+  | MemberExpressionNode
+  | ObjectPatternNode
+  | SubscriptExpressionNode
+  | UndefinedNode
+  ;
+
 
 export interface ReturnStatementNode extends NamedNodeBase {
   type: SyntaxType.ReturnStatement;
+  children: ReturnStatementChild[];
+  namedChildren: (ReturnStatementChild & NamedNodeBase)[];
+
+  child(index: number): ReturnStatementChild | null;
+  namedChild(index: number): (ReturnStatementChild & NamedNodeBase) | null;
 }
+
+export type ReturnStatementChild =
+  | ExpressionNode
+  | SequenceExpressionNode
+  ;
+
 
 export interface SequenceExpressionNode extends NamedNodeBase {
   type: SyntaxType.SequenceExpression;
+  children: SequenceExpressionChild[];
+  namedChildren: (SequenceExpressionChild & NamedNodeBase)[];
+
+  child(index: number): SequenceExpressionChild | null;
+  namedChild(index: number): (SequenceExpressionChild & NamedNodeBase) | null;
 }
+
+export type SequenceExpressionChild = ExpressionNode;
 
 export interface SpreadElementNode extends NamedNodeBase {
   type: SyntaxType.SpreadElement;
+  children: [SpreadElementChild];
+  namedChildren: (SpreadElementChild & NamedNodeBase)[];
+
+  child(index: number): SpreadElementChild | null;
+  namedChild(index: number): (SpreadElementChild & NamedNodeBase) | null;
 }
+
+export type SpreadElementChild = ExpressionNode;
 
 export interface StatementBlockNode extends NamedNodeBase {
   type: SyntaxType.StatementBlock;
+  children: StatementBlockChild[];
+  namedChildren: (StatementBlockChild & NamedNodeBase)[];
+
+  child(index: number): StatementBlockChild | null;
+  namedChild(index: number): (StatementBlockChild & NamedNodeBase) | null;
 }
+
+export type StatementBlockChild = StatementNode;
 
 export interface StringNode extends NamedNodeBase {
   type: SyntaxType.String;
+  children: StringChild[];
+  namedChildren: (StringChild & NamedNodeBase)[];
+
+  child(index: number): StringChild | null;
+  namedChild(index: number): (StringChild & NamedNodeBase) | null;
 }
+
+export type StringChild =
+  | EscapeSequenceNode
+  | HtmlCharacterReferenceNode
+  | StringFragmentNode
+  ;
+
 
 export interface SubscriptExpressionNode extends NamedNodeBase {
   type: SyntaxType.SubscriptExpression;
@@ -1197,7 +1541,18 @@ export interface SubscriptExpressionNode extends NamedNodeBase {
 
 export interface SwitchBodyNode extends NamedNodeBase {
   type: SyntaxType.SwitchBody;
+  children: SwitchBodyChild[];
+  namedChildren: (SwitchBodyChild & NamedNodeBase)[];
+
+  child(index: number): SwitchBodyChild | null;
+  namedChild(index: number): (SwitchBodyChild & NamedNodeBase) | null;
 }
+
+export type SwitchBodyChild =
+  | SwitchCaseNode
+  | SwitchDefaultNode
+  ;
+
 
 export interface SwitchCaseNode extends NamedNodeBase {
   type: SyntaxType.SwitchCase;
@@ -1218,11 +1573,34 @@ export interface SwitchStatementNode extends NamedNodeBase {
 
 export interface TemplateStringNode extends NamedNodeBase {
   type: SyntaxType.TemplateString;
+  children: TemplateStringChild[];
+  namedChildren: (TemplateStringChild & NamedNodeBase)[];
+
+  child(index: number): TemplateStringChild | null;
+  namedChild(index: number): (TemplateStringChild & NamedNodeBase) | null;
 }
+
+export type TemplateStringChild =
+  | EscapeSequenceNode
+  | StringFragmentNode
+  | TemplateSubstitutionNode
+  ;
+
 
 export interface TemplateSubstitutionNode extends NamedNodeBase {
   type: SyntaxType.TemplateSubstitution;
+  children: [TemplateSubstitutionChild];
+  namedChildren: (TemplateSubstitutionChild & NamedNodeBase)[];
+
+  child(index: number): TemplateSubstitutionChild | null;
+  namedChild(index: number): (TemplateSubstitutionChild & NamedNodeBase) | null;
 }
+
+export type TemplateSubstitutionChild =
+  | ExpressionNode
+  | SequenceExpressionNode
+  ;
+
 
 export interface TernaryExpressionNode extends NamedNodeBase {
   type: SyntaxType.TernaryExpression;
@@ -1233,7 +1611,18 @@ export interface TernaryExpressionNode extends NamedNodeBase {
 
 export interface ThrowStatementNode extends NamedNodeBase {
   type: SyntaxType.ThrowStatement;
+  children: [ThrowStatementChild];
+  namedChildren: (ThrowStatementChild & NamedNodeBase)[];
+
+  child(index: number): ThrowStatementChild | null;
+  namedChild(index: number): (ThrowStatementChild & NamedNodeBase) | null;
 }
+
+export type ThrowStatementChild =
+  | ExpressionNode
+  | SequenceExpressionNode
+  ;
+
 
 export interface TryStatementNode extends NamedNodeBase {
   type: SyntaxType.TryStatement;
@@ -1256,7 +1645,14 @@ export interface UpdateExpressionNode extends NamedNodeBase {
 
 export interface VariableDeclarationNode extends NamedNodeBase {
   type: SyntaxType.VariableDeclaration;
+  children: VariableDeclarationChild[];
+  namedChildren: (VariableDeclarationChild & NamedNodeBase)[];
+
+  child(index: number): VariableDeclarationChild | null;
+  namedChild(index: number): (VariableDeclarationChild & NamedNodeBase) | null;
 }
+
+export type VariableDeclarationChild = VariableDeclaratorNode;
 
 export interface VariableDeclaratorNode extends NamedNodeBase {
   type: SyntaxType.VariableDeclarator;
@@ -1278,7 +1674,14 @@ export interface WithStatementNode extends NamedNodeBase {
 
 export interface YieldExpressionNode extends NamedNodeBase {
   type: SyntaxType.YieldExpression;
+  children: YieldExpressionChild[];
+  namedChildren: (YieldExpressionChild & NamedNodeBase)[];
+
+  child(index: number): YieldExpressionChild | null;
+  namedChild(index: number): (YieldExpressionChild & NamedNodeBase) | null;
 }
+
+export type YieldExpressionChild = ExpressionNode;
 
 export interface CommentNode extends NamedNodeBase {
   type: SyntaxType.Comment;

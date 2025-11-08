@@ -94,3 +94,13 @@ function printClassName2(node: g.NamedNode) {
         console.log(node.nameNode?.text);
     }
 }
+
+function manualVisit() {
+    for (const node of tree.rootNode.children) {
+        switch (node.type) {
+            // @ts-expect-error
+            case g.SyntaxType.ClassHeritage:
+                // this is impossible because a ClassHeritage cannot appear at the top level!
+        }
+    }
+}
