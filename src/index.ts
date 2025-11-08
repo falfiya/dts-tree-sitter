@@ -6,6 +6,7 @@ import * as pathlib from "path";
 interface NodeTypeRef {
     type: string;
     named: boolean;
+    root?: boolean;
     isError?: boolean;
 }
 interface NodeTypeEntry extends NodeTypeRef {
@@ -113,17 +114,27 @@ function getTypeExprFromRef(ref: NodeTypeRef, index: IndexedData) {
 
 interface IndexedData {
     typeNames: Map<string, string>;
+    rootType: string | null;
 }
 
 function buildIndex(json: NodeTypeEntry[]): IndexedData {
     let typeNames = new Map<string, string>();
+    let rootType: string | null = null;
     for (let entry of json) {
         if (entry.named) {
             let name = getSyntaxKindFromString(entry.type);
             typeNames.set(entry.type, name);
+
+            if (entry.root) {
+                const type = getTypeNameFromString(entry.type);
+                if (rootType != null) {
+                    throw new Error(`Root ${type} conflicts with ${rootType}!`);
+                }
+                rootType = type;
+            }
         }
     }
-    return { typeNames };
+    return { typeNames, rootType };
 }
 
 function generatePreamble(json: NodeTypeEntry[], printer: Printer) {
@@ -282,7 +293,7 @@ function generateUnion(name: string, members: NodeTypeRef[], index: IndexedData,
         .println();
 }
 
-function generateModifiedTreeSitterDts(json: NodeTypeEntry[], dtsText: string, printer: Printer) {
+function generateModifiedTreeSitterDts(json: NodeTypeEntry[], dtsText: string, printer: Printer, index: IndexedData) {
     let text = dtsText
         .replace(/declare module ['"]tree-sitter['"] {(.*)}/s, (str, p1) => p1.replace(/^  /gm, ''))
         .replace('export = Parser', '')
@@ -295,7 +306,12 @@ function generateModifiedTreeSitterDts(json: NodeTypeEntry[], dtsText: string, p
         .replace(/descendantsOfType\(types: [^,]*, (.*)\): Array<SyntaxNode>;/,
             'descendantsOfType<T extends TypeString>(types: T | readonly T[], $1): NodeOfType<T>[];')
         .replace(/\n\n\n+/g, '\n\n')
-        .replace(/\n+$/, '')
+        .replace(/\n+$/, '');
+
+    if (index.rootType) {
+        text = text.replace(/(?<=readonly rootNode: ).+?;/, index.rootType + ';');
+    }
+
     printer.println(text);
 }
 
@@ -349,7 +365,7 @@ function main() {
     let json = JSON.parse(fs.readFileSync(filename, 'utf8')) as NodeTypeEntry[];
     let index = buildIndex(json);
     let printer = new Printer();
-    generateModifiedTreeSitterDts(json, treeSitterDtsText, printer);
+    generateModifiedTreeSitterDts(json, treeSitterDtsText, printer, index);
     generatePreamble(json, printer);
     generateTypeEnum(json, index, printer);
     generateRootUnion(json, index, printer);
