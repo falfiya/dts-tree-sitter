@@ -85,7 +85,7 @@ function mangleNameToIdentifier(str: string) {
 
 function toCapitalCase(str: string) {
     return str.replace(/^[a-z]/, t => t.toUpperCase())
-              .replace(/_[a-zA-Z]/g, t => t.substring(1).toUpperCase())
+              .replace(/_[a-zA-Z]/g, t => t.substring(1).toUpperCase());
 }
 
 function getTypePrefixFromString(str: string) {
@@ -140,7 +140,7 @@ function buildIndex(json: NodeTypeEntry[]): IndexedData {
 function generatePreamble(json: NodeTypeEntry[], printer: Printer) {
     printer.println(`
 interface NamedNodeBase extends SyntaxNodeBase {
-    isNamed: true;
+  isNamed: true;
 }
 
 /** An unnamed node with the given type string. */
@@ -195,15 +195,15 @@ type TreeCursorRecord = { [K in TypeString]: TreeCursorOfType<K, NodeOfType<K>> 
 export type TypedTreeCursor = TreeCursorRecord[keyof TreeCursorRecord];
 
 export interface ErrorNode extends NamedNodeBase {
-    type: SyntaxType.ERROR;
-    hasError: true;
+  type: SyntaxType.ERROR;
+  hasError: true;
 }
 `);
 }
 
 function generateTypeEnum(json: NodeTypeEntry[], { typeNames }: IndexedData, printer: Printer) {
-    printer.
-        println('export const enum SyntaxType {')
+    printer
+        .println('export const enum SyntaxType {')
         .indent()
         .println('ERROR = "ERROR",')
         .forEach(json, entry => {
@@ -382,7 +382,7 @@ function main() {
         console.error(usageText);
         process.exit(1);
     }
-    let locations = getLookupLocations(args[0]); 
+    let locations = getLookupLocations(args[0]);
     let filename = locations.find(fileExists);
     let treeSitterDtsText = getTreeSitterDts();
     if (filename == null) {
