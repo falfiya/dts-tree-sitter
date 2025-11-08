@@ -282,15 +282,24 @@ function generateRootUnion(json: NodeTypeEntry[], index: IndexedData, printer: P
 }
 
 function generateUnion(name: string, members: NodeTypeRef[], index: IndexedData, printer: Printer) {
-    printer
-        .println(`export type ${name} =`)
-        .indent()
-        .forEach(members, ref => {
-            printer.println('| ' + getTypeExprFromRef(ref, index))
-        })
-        .println(';')
-        .deindent()
-        .println();
+    switch (members.length) {
+        case 0:
+            printer.println(`export type ${name} = never;`);
+            break;
+        case 1:
+            printer.println(`export type ${name} = ${getTypeExprFromRef(members[0], index)};`);
+            break;
+        default:
+            printer
+                .println(`export type ${name} =`)
+                .indent()
+                .forEach(members, ref => {
+                    printer.println('| ' + getTypeExprFromRef(ref, index))
+                })
+                .println(';')
+                .deindent()
+                .println();
+    }
 }
 
 function generateModifiedTreeSitterDts(json: NodeTypeEntry[], dtsText: string, printer: Printer, index: IndexedData) {
