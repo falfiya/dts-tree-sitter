@@ -6,6 +6,9 @@ endif
 
 export NODE_OPTIONS:=--enable-source-maps
 
+example: example.js beancount.d.ts
+	node $<
+
 beancount.d.ts: main.js
 	node $< > beancount.d.ts
 
@@ -15,5 +18,5 @@ opts += --format=esm
 opts += --platform=node
 opts += --packages=external
 
-main.js: main.ts
+%.js: %.ts
 	esbuild $< $(opts) --outdir=.
