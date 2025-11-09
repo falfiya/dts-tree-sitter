@@ -6,8 +6,8 @@ endif
 
 export NODE_OPTIONS:=--enable-source-maps
 
-run: main.js
-	node $<
+beancount.d.ts: main.js
+	node $< > beancount.d.ts
 
 opts += --bundle
 opts += --sourcemap

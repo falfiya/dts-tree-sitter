@@ -3,6 +3,9 @@
 import * as fs from "fs";
 import * as pathlib from "path";
 
+import {createRequire} from "module";
+const require = createRequire(import.meta.url);
+
 interface NodeTypeRef {
    type: string;
    named: boolean;
@@ -343,12 +346,6 @@ function generateModifiedTreeSitterDts(json: NodeTypeEntry[], dtsText: string, p
    printer.println(text);
 }
 
-const usageText = `
-  Usage: dts-tree-sitter INPUT > OUTPUT.d.ts
-
-  Generates a .d.ts file to stdout.
-`;
-
 function fileExists(file: string) {
    try {
       return fs.statSync(file).isFile();
@@ -377,22 +374,19 @@ function getTreeSitterDts() {
 }
 
 function main() {
-   let args = process.argv.slice(2);
-   if (args.length !== 1) {
-      console.error(usageText);
-      process.exit(1);
-   }
-   let locations = getLookupLocations(args[0]);
-   let filename = locations.find(fileExists);
-   let treeSitterDtsText = getTreeSitterDts();
+   const locations = getLookupLocations("tree-sitter-beancount");
+   const filename = locations.find(fileExists);
+   const treeSitterDtsText = getTreeSitterDts();
    if (filename == null) {
       console.error(`Could not find node-types.json at any of the following locations:`);
       locations.forEach(l => console.log(`  ${l}`));
       process.exit(1);
    }
-   let json = JSON.parse(fs.readFileSync(filename, 'utf8')) as NodeTypeEntry[];
-   let index = buildIndex(json);
-   let printer = new Printer();
+
+   const json = JSON.parse(fs.readFileSync(filename, "utf8")) as NodeTypeEntry[];
+   const index = buildIndex(json);
+   const printer = new Printer();
+
    generateModifiedTreeSitterDts(json, treeSitterDtsText, printer, index);
    generatePreamble(json, printer);
    generateTypeEnum(json, index, printer);
