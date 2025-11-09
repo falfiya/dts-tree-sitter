@@ -31,5 +31,6 @@ for (const x of file.children) {
          console.log(postingStr);
       }
       console.groupEnd();
+      break;
    }
 }
