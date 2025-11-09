@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import * as fs from "fs";
 import * as pathlib from "path";
 
@@ -12,11 +10,13 @@ interface NodeTypeRef {
    root?: boolean;
    isError?: boolean;
 }
+
 interface NodeTypeEntry extends NodeTypeRef {
    subtypes?: NodeTypeRef[];
    fields?: Record<string, NodeTypeChildren>;
    children?: NodeTypeChildren;
 }
+
 interface NodeTypeChildren {
    multiple: boolean;
    required: boolean;
@@ -24,16 +24,18 @@ interface NodeTypeChildren {
 }
 
 class Printer {
-   private indentation = '';
+   private indentation = "";
 
    indent(): this {
-      this.indentation += '  ';
+      this.indentation += "   ";
       return this;
    }
-   deindent(): this {
-      this.indentation = this.indentation.substring(0, this.indentation.length - 2);
+
+   outdent(): this {
+      this.indentation = this.indentation.substring(0, this.indentation.length - 3);
       return this;
    }
+
    println(str?: string): this {
       if (str == null) {
          console.log();
@@ -42,6 +44,7 @@ class Printer {
       }
       return this;
    }
+
    printEach(items: (string | void)[] | void): this {
       if (items == null) return this;
       for (let item of items) {
@@ -50,6 +53,7 @@ class Printer {
       }
       return this;
    }
+
    forEach<U>(items: U[] | void, fn: (item: NonNullable<U>, printer: Printer) => void): this {
       if (items == null) return this;
       for (let item of items) {
@@ -58,6 +62,7 @@ class Printer {
       }
       return this;
    }
+
    forEachInRecord<U>(items: Record<string, U> | void, fn: (key: string, item: NonNullable<U>, printer: Printer) => void): this {
       if (items == null) return this;
       for (let key of Object.keys(items)) {
@@ -87,8 +92,9 @@ function mangleNameToIdentifier(str: string) {
 }
 
 function toCapitalCase(str: string) {
-   return str.replace(/^[a-z]/, t => t.toUpperCase())
-           .replace(/_[a-zA-Z]/g, t => t.substring(1).toUpperCase());
+   return str
+      .replace(/^[a-z]/, t => t.toUpperCase())
+      .replace(/_[a-zA-Z]/g, t => t.substring(1).toUpperCase());
 }
 
 function getTypePrefixFromString(str: string) {
@@ -105,12 +111,10 @@ function getSyntaxKindFromString(str: string) {
 
 function getTypeExprFromRef(ref: NodeTypeRef, index: IndexedData) {
    if (ref.isError) {
-      return 'ErrorNode';
+      return "ErrorNode";
    }
    if (!ref.named) {
-      let name = index.typeNames.get(ref.type);
-      let arg = name != null ? `SyntaxType.${name}` : JSON.stringify(ref.type);
-      return `UnnamedNode<${arg}>`;
+      return `UnnamedNode<${JSON.stringify(ref.type)}>`;
    }
    return getTypeNameFromString(ref.type);
 }
@@ -143,13 +147,13 @@ function buildIndex(json: NodeTypeEntry[]): IndexedData {
 function generatePreamble(json: NodeTypeEntry[], printer: Printer) {
    printer.println(`
 interface NamedNodeBase extends SyntaxNodeBase {
-  isNamed: true;
+   isNamed: true;
 }
 
 /** An unnamed node with the given type string. */
 export interface UnnamedNode<T extends string = string> extends SyntaxNodeBase {
-  type: T;
-  isNamed: false;
+   type: T;
+   isNamed: false;
 }
 
 type PickNamedType<Node, T extends string> = Node extends { type: T; isNamed: true } ? Node : never;
@@ -167,8 +171,8 @@ export type NamedNode<T extends SyntaxType = SyntaxType> = PickNamedType<SyntaxN
 export type NodeOfType<T extends string> = PickType<SyntaxNode, T>;
 
 interface TreeCursorOfType<S extends string, T extends SyntaxNodeBase> {
-  nodeType: S;
-  currentNode: T;
+   nodeType: S;
+   currentNode: T;
 }
 
 type TreeCursorRecord = { [K in TypeString]: TreeCursorOfType<K, NodeOfType<K>> };
@@ -185,38 +189,38 @@ type TreeCursorRecord = { [K in TypeString]: TreeCursorOfType<K, NodeOfType<K>> 
  * \`\`\`ts
  * let cursor = root.walk();
  * while (cursor.gotoNextSibling()) {
- *   const c = cursor as TypedTreeCursor;
- *   switch (c.nodeType) {
- *     case SyntaxType.Foo: {
- *       let node = c.currentNode; // Typed as FooNode.
- *       break;
- *     }
- *   }
- * }
+ *    const c = cursor as TypedTreeCursor;
+ *    switch (c.nodeType) {
+ *       case SyntaxType.Foo: {
+ *          let node = c.currentNode; // Typed as FooNode.
+ *          break;
+ *       }
+ *    }
+ *    }
  * \`\`\`
  */
 export type TypedTreeCursor = TreeCursorRecord[keyof TreeCursorRecord];
 
 export interface ErrorNode extends NamedNodeBase {
-  type: SyntaxType.ERROR;
-  hasError: true;
+   type: "ERROR";
+   hasError: true;
 }
 `);
 }
 
 function generateTypeEnum(json: NodeTypeEntry[], { typeNames }: IndexedData, printer: Printer) {
    printer
-      .println('export const enum SyntaxType {')
+      .println('export type SyntaxType =')
       .indent()
-      .println('ERROR = "ERROR",')
+      .println('| "ERROR"')
       .forEach(json, entry => {
          if (entry.named && (entry.subtypes == null || entry.subtypes.length === 0)) {
             let name = getSyntaxKindFromString(entry.type);
-            printer.println(`${name} = ${JSON.stringify(entry.type)},`);
+            printer.println(`| ${JSON.stringify(entry.type)}`);
          }
       })
-      .deindent()
-      .println('}')
+      .println(';')
+      .outdent()
       .println()
       .println('export type UnnamedType =')
       .indent()
@@ -224,14 +228,14 @@ function generateTypeEnum(json: NodeTypeEntry[], { typeNames }: IndexedData, pri
          if (!entry.named) {
             let name = typeNames.get(entry.type);
             if (name != null) {
-               printer.println(`| SyntaxType.${name} // both named and unnamed`);
+               printer.println(`| ${JSON.stringify(entry.type)} // both named and unnamed`);
             } else {
                printer.println(`| ${JSON.stringify(entry.type)}`);
             }
          }
       })
       .println(';')
-      .deindent()
+      .outdent()
       .println()
       .println('export type TypeString = SyntaxType | UnnamedType;')
       .println();
@@ -253,7 +257,7 @@ function generateInterfaceFromEntry(entry: NodeTypeEntry, index: IndexedData, pr
    printer
       .println(`export interface ${name} extends NamedNodeBase {`)
       .indent()
-      .println(`type: SyntaxType.${kind};`)
+      .println(`type: ${JSON.stringify(entry.type)};`)
       .forEachInRecord(entry.fields, (field, children) => {
          let fieldName = field + 'Node';
          let type = children.types.map(t => getTypeExprFromRef(t, index)).join(' | ');
@@ -271,26 +275,34 @@ function generateInterfaceFromEntry(entry: NodeTypeEntry, index: IndexedData, pr
          printer.println(`${fieldName}${opt}: ${type};`);
       });
 
+   let generateChildrenUnion = false;
    if (entry.children) {
-      if (!entry.children.multiple && entry.children.required) {
-         printer.println(`children: [${kind}Child];`);
+      let childType: string;
+      if (entry.children.types.length === 1) {
+         childType = getTypeExprFromRef(entry.children.types[0]!, index);
       } else {
-         printer.println(`children: ${kind}Child[];`);
+         generateChildrenUnion = true;
+         childType = `${kind}Child`;
       }
-      printer.println(`namedChildren: (${kind}Child & NamedNodeBase)[];`)
+
+      if (!entry.children.multiple && entry.children.required) {
+         printer.println(`children: [${childType}];`);
+      } else {
+         printer.println(`children: ${childType}[];`);
+      }
+      printer.println(`namedChildren: (${childType} & NamedNodeBase)[];`)
       printer.println();
-      printer.println(`child(index: number): ${kind}Child | null;`);
-      printer.println(`namedChild(index: number): (${kind}Child & NamedNodeBase) | null;`);
+      printer.println(`child(index: number): ${childType} | null;`);
+      printer.println(`namedChild(index: number): (${childType} & NamedNodeBase) | null;`);
    }
 
    printer
-      .deindent()
+      .outdent()
       .println('}')
       .println();
 
-   if (entry.children) {
-      generateUnion(`${kind}Child`, entry.children.types, index, printer);
-      printer.println();
+   if (generateChildrenUnion) {
+      generateUnion(`${kind}Child`, entry.children!.types, index, printer);
    }
 }
 
@@ -319,7 +331,7 @@ function generateUnion(name: string, members: NodeTypeRef[], index: IndexedData,
                printer.println('| ' + getTypeExprFromRef(ref, index))
             })
             .println(';')
-            .deindent()
+            .outdent()
             .println();
    }
 }
@@ -337,7 +349,8 @@ function generateModifiedTreeSitterDts(json: NodeTypeEntry[], dtsText: string, p
       .replace(/descendantsOfType\(types: [^,]*, (.*)\): Array<SyntaxNode>;/,
          'descendantsOfType<T extends TypeString>(types: T | readonly T[], $1): NodeOfType<T>[];')
       .replace(/\n\n\n+/g, '\n\n')
-      .replace(/\n+$/, '');
+      .replace(/\n+$/, '')
+      .replace(/(?<=^(?:  )*?)  /gm, "   ");
 
    if (index.rootType) {
       text = text.replace(/(?<=readonly rootNode: ).+?;/, index.rootType + ';');
